@@ -55,6 +55,14 @@ public class MorseDecoder {
         for (int binIndex = 0; binIndex < totalBinCount; binIndex++) {
             // Get the right number of samples from the inputFile
             // Sum all the samples together and store them in the returnBuffer
+            int framesRead = inputFile.readFrames(sampleBuffer, BIN_SIZE);
+
+            int sampleSum = 0;
+
+            for (int i = 0; i < BIN_SIZE; i++) {
+                sampleSum += sampleBuffer[binIndex + i];
+            }
+            returnBuffer[binIndex] = sampleSum;
         }
         return returnBuffer;
     }
@@ -77,7 +85,23 @@ public class MorseDecoder {
      * @return the Morse code string of dots, dashes, and spaces
      */
     private static String powerToDotDash(final double[] powerMeasurements) {
-        return "";
+        String result = "";
+        for (int i = 0; i < powerMeasurements.length; i += DASH_BIN_COUNT) {
+            int binAbovePowerThreshold = 0;
+            for (int j = 0; j < DASH_BIN_COUNT; j++) {
+                if (powerMeasurements[i + j] >= POWER_THRESHOLD) {
+                    binAbovePowerThreshold++;
+                }
+            }
+            if (binAbovePowerThreshold == DASH_BIN_COUNT) {
+                result += "- ";
+            } else if (binAbovePowerThreshold > 0) {
+                result += ". ";
+            } else {
+                result += " ";
+                }
+            }
+        return result;
     }
 
     /**
